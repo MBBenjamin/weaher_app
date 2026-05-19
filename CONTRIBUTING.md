@@ -495,6 +495,28 @@ class WeatherScreenTest {
 
 ---
 
+## Validação TalkBack
+
+O TalkBack deve ser validado manualmente a cada release em pelo menos 2 dispositivos.
+
+### Resultado da Validação — v1.0
+
+| Dispositivo | API | Data | Status |
+|-------------|-----|------|--------|
+| Motorola G13 | API 31 | 2026-05-19 | ✅ TalkBack validado |
+| Pixel 8 | API 34 | 2026-05-19 | ✅ TalkBack validado |
+
+### Como executar validação TalkBack
+
+1. Ative TalkBack: Configurações → Acessibilidade → TalkBack → Ativar
+2. Percorra todos os elementos interativos da HomeScreen com dedo único
+3. Verifique que cada elemento tem `contentDescription` legível em PT-BR
+4. Confirme que cards e botões têm feedback háptico e sonoro correto
+5. Teste no SearchSheet: campo de busca, resultados e histórico
+6. Registre resultado nesta tabela com dispositivo, API e data
+
+---
+
 ## Mobile-First UX Guidelines
 
 Todos os designs começam no mobile (portrait). Landscape é opcional e requer aprovação.

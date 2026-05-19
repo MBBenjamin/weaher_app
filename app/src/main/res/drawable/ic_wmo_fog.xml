@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- WMO 45-48: Névoa / Névoa com geada -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24"
+    android:tint="?attr/colorPrimary">
+    <!-- 4 faixas horizontais representando camadas de névoa -->
+    <path
+        android:fillColor="@android:color/black"
+        android:pathData="M3,5H21V7H3V5ZM3,9H21V11H3V9ZM3,13H21V15H3V13ZM3,17H21V19H3V17Z" />
+</vector>

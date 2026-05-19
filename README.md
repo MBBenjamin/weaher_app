@@ -23,9 +23,53 @@ Menos é mais. A maioria dos apps de clima tem dezenas de telas, gráficos compl
 
 O app foi pensado para quem consulta a previsão do tempo rapidamente antes de sair — não para meteorologistas.
 
+## Pré-requisitos
+
+| Ferramenta | Versão mínima |
+|------------|---------------|
+| Android Studio | Ladybug 2024.1+ |
+| Android SDK | API 24 (min) → API 34 (target) |
+| JDK | 17 (incluído no Android Studio) |
+| Git | 2.40+ |
+
+## Setup
+
+```bash
+git clone <repo-url>
+cd weather_app
+# Abrir no Android Studio: File → Open → selecionar pasta
+```
+
+### ⚠️ Firebase — configuração obrigatória antes do release
+
+O arquivo `app/google-services.json` incluído no repositório contém **valores fictícios para desenvolvimento**.
+Antes de fazer um build de release ou publicar no Firebase, substitua-o pelo arquivo real:
+
+1. Acesse o [Firebase Console](https://console.firebase.google.com)
+2. Crie ou selecione seu projeto
+3. Adicione o app Android com package name `com.weather`
+4. Faça o download do `google-services.json`
+5. Substitua o arquivo em `app/google-services.json`
+
+### Build
+
+```bash
+# Debug (LeakCanary ativo, logs verbosos)
+./gradlew assembleDebug
+
+# Release (ProGuard/R8, sem logs)
+./gradlew assembleRelease
+
+# Testes unitários
+./gradlew test
+
+# Testes instrumentados (requer emulador ou device)
+./gradlew connectedAndroidTest
+```
+
 ## Status
 
-Em desenvolvimento. Primeira versão (MVP) em construção.
+Em desenvolvimento. Primeira versão (MVP) em construção — ver [tasks.md](specs/001-weather-app-mvp/tasks.md).
 
 ---
 

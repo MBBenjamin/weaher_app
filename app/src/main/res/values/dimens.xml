@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Tokens de dimensão — substituídos pelo design system completo em T004.
+    Valores definitivos definidos em Shape.kt (Compose).
+-->
+<resources>
+    <dimen name="screen_padding">16dp</dimen>
+    <dimen name="card_radius">16dp</dimen>
+    <dimen name="card_main_radius">24dp</dimen>
+    <dimen name="chip_radius">12dp</dimen>
+    <dimen name="wmo_icon_size">80dp</dimen>
+    <dimen name="touch_target_min">48dp</dimen>
+</resources>

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- WMO 1-2: Predominantemente limpo / Parcialmente nublado -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24"
+    android:tint="?attr/colorPrimary">
+    <!-- Sol visível no canto superior direito, parcialmente coberto pela nuvem -->
+    <path
+        android:fillColor="@android:color/black"
+        android:pathData="M17,3.5m-3.5,0a3.5,3.5 0,1,0 7,0a3.5,3.5 0,1,0 -7,0M17,0v1.5M17,9v1.5M13.5,3.5h-1.5M22,3.5h-1.5M14.55,0.55l1.06,1.06M20.39,6.39l1.06,1.06M14.55,6.45l1.06,-1.06M20.39,0.61l1.06,-1.06" />
+    <!-- Nuvem na frente (cobre parte do sol) -->
+    <path
+        android:fillColor="@android:color/black"
+        android:pathData="M19.35,14.04C18.67,10.59 15.64,8 12,8c-2.89,0 -5.4,1.64 -6.65,4.04C2.34,12.36 0,14.91 0,18c0,3.31 2.69,6 6,6h13c2.76,0 5,-2.24 5,-5 0,-2.64 -2.05,-4.78 -4.65,-4.96z" />
+</vector>

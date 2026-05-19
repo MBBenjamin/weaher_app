@@ -1,0 +1,28 @@
+complexity:
+  CyclomaticComplexMethod:
+    threshold: 10
+  LongMethod:
+    threshold: 60
+  LongParameterList:
+    functionThreshold: 8
+    constructorThreshold: 8
+
+style:
+  MaxLineLength:
+    maxLineLength: 120
+    excludeCommentStatements: true
+
+formatting:
+  MaximumLineLength:
+    maxLineLength: 120
+
+# Ignorar código gerado pelo KSP (Hilt, Room) e arquivos de build
+excludes: >
+  '**/build/**',
+  '**/generated/**',
+  '**/*_MembersInjector.kt',
+  '**/*_Factory.kt',
+  '**/*_HiltModules.kt',
+  '**/Hilt_*.kt',
+  '**/*Module_*.kt',
+  '**/di/**/*Provides*'

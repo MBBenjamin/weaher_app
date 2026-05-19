@@ -5,7 +5,9 @@
       "Bash(git commit -m ' *)",
       "Bash(powershell -NonInteractive -Command \"& '.specify/scripts/powershell/setup-tasks.ps1' -Json\")",
       "Bash(powershell -NonInteractive -Command \"& '.specify/scripts/powershell/check-prerequisites.ps1' -Json -RequireTasks -IncludeTasks\")",
-      "Bash(powershell.exe -NonInteractive -Command \".specify/scripts/powershell/check-prerequisites.ps1 -Json -RequireTasks -IncludeTasks\")"
+      "Bash(powershell.exe -NonInteractive -Command \".specify/scripts/powershell/check-prerequisites.ps1 -Json -RequireTasks -IncludeTasks\")",
+      "Bash(New-Item -ItemType File -Path \"c:\\\\Users\\\\marce\\\\Documents\\\\Projetos\\\\weather_app\\\\CONTRIBUTING.md\" -Force)",
+      "Bash(Out-Null)"
     ]
   }
 }

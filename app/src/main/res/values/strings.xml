@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Nome do app -->
+    <string name="app_name">Tempo</string>
+
+    <!-- Mensagens de erro (PT-BR, amigáveis, sem jargão técnico) -->
+    <string name="error_no_internet">Sem conexão. Usando dados em cache.</string>
+    <string name="error_location_denied">Erro ao obter localização. Use busca manual.</string>
+    <string name="error_generic">Algo deu errado. Tente novamente.</string>
+    <string name="error_rate_limit">Muitas requisições. Aguardando…</string>
+    <string name="error_no_cache">Sem dados disponíveis. Verifique sua conexão.</string>
+    <string name="error_invalid_location">Erro ao obter localização. Use busca manual.</string>
+
+    <!-- Labels de UI -->
+    <string name="label_refresh">Atualizar</string>
+    <string name="label_search_hint">Buscar cidade…</string>
+    <string name="label_try_again">Tentar novamente</string>
+    <string name="label_search_another_city">Buscar outra cidade</string>
+    <string name="label_loading">Carregando…</string>
+    <string name="label_offline">OFFLINE</string>
+    <string name="label_location_approx">Localização aproximada · refinando…</string>
+    <string name="label_open_settings">Abrir configurações</string>
+    <string name="label_today">HOJE</string>
+    <string name="label_hourly_tab_chart">Gráfico</string>
+    <string name="label_hourly_tab_list">Listagem</string>
+    <string name="label_day_tab_hourly">Horário</string>
+    <string name="label_day_tab_indices">Índices</string>
+    <string name="label_search_history_empty">Nenhuma busca recente</string>
+    <string name="label_rate_limit_banner">Limite de requisições · Tentando em %ds</string>
+
+    <!-- Dados de clima — descrições WMO (PT-BR) -->
+    <string name="weather_clear_sky">Céu limpo</string>
+    <string name="weather_mainly_clear">Predominantemente limpo</string>
+    <string name="weather_partly_cloudy">Parcialmente nublado</string>
+    <string name="weather_overcast">Nublado</string>
+    <string name="weather_fog">Névoa</string>
+    <string name="weather_depositing_rime_fog">Névoa com geada</string>
+    <string name="weather_drizzle_light">Chuvisco leve</string>
+    <string name="weather_drizzle_moderate">Chuvisco moderado</string>
+    <string name="weather_drizzle_dense">Chuvisco intenso</string>
+    <string name="weather_freezing_drizzle_light">Chuvisco congelante leve</string>
+    <string name="weather_freezing_drizzle_dense">Chuvisco congelante intenso</string>
+    <string name="weather_rain_slight">Chuva leve</string>
+    <string name="weather_rain_moderate">Chuva moderada</string>
+    <string name="weather_rain_heavy">Chuva forte</string>
+    <string name="weather_freezing_rain_light">Chuva congelante leve</string>
+    <string name="weather_freezing_rain_heavy">Chuva congelante forte</string>
+    <string name="weather_snow_slight">Neve leve</string>
+    <string name="weather_snow_moderate">Neve moderada</string>
+    <string name="weather_snow_heavy">Neve forte</string>
+    <string name="weather_snow_grains">Granizo de neve</string>
+    <string name="weather_showers_slight">Pancadas leves</string>
+    <string name="weather_showers_moderate">Pancadas moderadas</string>
+    <string name="weather_showers_violent">Pancadas violentas</string>
+    <string name="weather_snow_showers_slight">Pancadas de neve leves</string>
+    <string name="weather_snow_showers_heavy">Pancadas de neve fortes</string>
+    <string name="weather_thunderstorm">Tempestade</string>
+    <string name="weather_thunderstorm_hail_slight">Tempestade com granizo leve</string>
+    <string name="weather_thunderstorm_hail_heavy">Tempestade com granizo forte</string>
+    <string name="weather_unknown">Condição desconhecida</string>
+
+    <!-- Strings de acessibilidade / TalkBack -->
+    <string name="a11y_current_weather">Clima atual: %1$s, %2$s. Sensação %3$s. Umidade %4$s. Vento %5$s %6$s.</string>
+    <string name="a11y_temperature">Temperatura: %s graus Celsius</string>
+    <string name="a11y_humidity">Umidade: %s por cento</string>
+    <string name="a11y_wind">Vento: %1$s quilômetros por hora, direção %2$s</string>
+    <string name="a11y_wmo_icon">Ícone de clima: %s</string>
+    <string name="a11y_day_card">Previsão para %1$s: %2$s. Máxima %3$s°, Mínima %4$s°. Chuva %5$s por cento.</string>
+    <string name="a11y_hour_card">%1$s: %2$s graus, %3$s</string>
+    <string name="a11y_offline_badge">Modo offline. Dados de há %s horas.</string>
+    <string name="a11y_location_badge">Localização aproximada sendo refinada pelo GPS.</string>
+    <string name="a11y_navigate_prev_day">Dia anterior</string>
+    <string name="a11y_navigate_next_day">Próximo dia</string>
+    <string name="a11y_refresh_button">Atualizar previsão do tempo</string>
+    <string name="a11y_search_button">Buscar cidade</string>
+
+    <!-- Crédito de dados (RF-07 footer) -->
+    <string name="data_credit">Dados: open-meteo.com</string>
+
+    <!-- Formato relativo de tempo -->
+    <string name="timestamp_updated_just_now">Atualizado agora</string>
+    <string name="timestamp_updated_minutes">Atualizado há %d min</string>
+    <string name="timestamp_updated_hours">Atualizado há %dh</string>
+    <string name="offline_data_age_hours">Usando dados de há %d horas</string>
+</resources>

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Tokens de cores — substituídos pelo design system completo em T004.
+    Valores definitivos definidos em Color.kt (Compose).
+-->
+<resources>
+    <color name="color_primary">#0288D1</color>
+    <color name="color_surface">#FAFAFA</color>
+    <color name="color_background">#F0F4F8</color>
+</resources>

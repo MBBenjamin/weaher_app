@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Stub mínimo para compilação — substituído pelo design system completo em T004.
+    WeatherTheme (Compose) é a fonte de verdade; este arquivo só existe para o
+    atributo android:theme no AndroidManifest.xml.
+-->
+<resources>
+    <style name="Theme.WeatherApp" parent="android:Theme.Material.Light.NoActionBar" />
+</resources>
