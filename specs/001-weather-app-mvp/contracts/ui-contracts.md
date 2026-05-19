@@ -154,8 +154,8 @@ object Spacing {
 |--------|----|
 | `Carregando` | Skeleton shimmer em todos os cards |
 | `Sucesso` | Dados completos, sem badges |
-| `Sucesso + isLocalizacaoAproximada` | LocationBadge azul visível |
-| `SucessoOffline` | OfflineBadge vermelho + mensagem |
+| `Sucesso + isLocalizacaoAproximada=true` | LocationBadge azul visível |
+| `Sucesso + isOffline=true` | OfflineBadge vermelho + "Usando dados de há X horas" |
 | `Erro` | Tela de erro com botão "Tentar novamente" |
 | `SemPermissao` | SearchSheet aberto automaticamente |
 

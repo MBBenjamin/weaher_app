@@ -139,19 +139,25 @@ fun DadosAtuais.iconeWMO(): Int             // @DrawableRes via WmoMapper
 
 ```kotlin
 data class DadosHorarios(
-    val horas: List<HoraDados>         // Exatamente 24 entradas
+    val horas: List<HoraDados>         // 168 entradas (24h × 7 dias)
 )
 
 data class HoraDados(
+    val dataIso: String,               // "2026-05-17" — chave de filtro por dia
     val hora: String,                  // "HH:00" formatado PT-BR
     val temperaturaC: Float,
     val precipitacaoMm: Float,         // 0.0+ mm
-    val codigoWMO: Int
+    val codigoWMO: Int,
+    val umidadePercent: Int,           // 0-100 (para HourDetailSheet)
+    val velocidadeVentoKmh: Float,     // km/h (para HourDetailSheet)
+    val direcaoVentoGraus: Int         // 0-359 (para HourDetailSheet)
 )
 ```
 
 **Regras de negócio**:
-- Filtrar apenas as 24 horas do dia corrente (não dias futuros)
+- Armazena todas as horas dos 7 dias retornadas pela API (168 entradas)
+- `HomeViewModel` filtra por `dataIso == hoje` → exibe as 24h do dia corrente na HourlyForecastSection
+- `DayDetailSheet` filtra por `dataIso == diaSelecionado.dataIso` → exibe as 24h do dia selecionado
 - `hora` deve ser formatado como "14:00", não timestamp ISO completo
 
 ---
@@ -166,10 +172,12 @@ data class DadosDiarios(
 data class DiaDados(
     val data: String,                  // "Sex, 17 mai" (formatado PT-BR)
     val dataIso: String,               // "2026-05-17" (para lookup horário)
-    val temperaturMaxC: Float,
-    val temperaturMinC: Float,
+    val temperaturaMaxC: Float,
+    val temperaturaMinC: Float,
     val probChuvaPercent: Int,         // 0-100
     val velocidadeMaxVentoKmh: Float,
+    val direcaoDominanteVentoGraus: Int, // 0-359° dominante do dia (DayDetailSheet Índices)
+    val umidadeMaxPercent: Int,        // 0-100 % máxima do dia (DayDetailSheet Índices)
     val codigoWMO: Int,
     val eHoje: Boolean                 // true para primeiro dia
 )
@@ -216,28 +224,22 @@ data class HistoricoBusca(
 ```kotlin
 sealed class HomeUiState {
     object Carregando : HomeUiState()
-    
+
     data class Sucesso(
         val previsao: Previsao,
         val nomeLocalidade: String,
         val isLocalizacaoAproximada: Boolean = false,
-        val isOffline: Boolean = false,
-        val timestampRelativo: String          // "Atualizado há 5 minutos"
+        val isOffline: Boolean = false,        // true → exibe OfflineBadge
+        val timestampRelativo: String,         // "Atualizado há 5 minutos"
+        val horasAtraso: Int = 0               // usado quando isOffline=true
     ) : HomeUiState()
-    
-    data class SucessoOffline(
-        val previsao: Previsao,
-        val nomeLocalidade: String,
-        val timestampRelativo: String,
-        val horasAtraso: Int
-    ) : HomeUiState()
-    
+
     data class Erro(
         val mensagem: String,
         val temCache: Boolean = false,
         val previsaoCache: Previsao? = null
     ) : HomeUiState()
-    
+
     object SemPermissao : HomeUiState()
 }
 ```
@@ -296,7 +298,10 @@ data class DadosHorariosDto(
     val time: List<String>,
     @SerialName("temperature_2m") val temperature2m: List<Float>,
     val precipitation: List<Float>,
-    @SerialName("weather_code") val weatherCode: List<Int>
+    @SerialName("weather_code") val weatherCode: List<Int>,
+    @SerialName("wind_speed_10m") val windSpeed10m: List<Float>,
+    @SerialName("wind_direction_10m") val windDirection10m: List<Int>,
+    @SerialName("relative_humidity_2m") val relativeHumidity2m: List<Int>
 )
 
 @Serializable
@@ -306,7 +311,9 @@ data class DadosDiariosDto(
     @SerialName("temperature_2m_min") val temperature2mMin: List<Float>,
     @SerialName("weather_code") val weatherCode: List<Int>,
     @SerialName("precipitation_probability_max") val precipitationProbabilityMax: List<Int>,
-    @SerialName("wind_speed_10m_max") val windSpeed10mMax: List<Float>
+    @SerialName("wind_speed_10m_max") val windSpeed10mMax: List<Float>,
+    @SerialName("wind_direction_10m_dominant") val windDirection10mDominant: List<Int>,
+    @SerialName("relative_humidity_2m_max") val relativeHumidity2mMax: List<Int>
 )
 ```
 

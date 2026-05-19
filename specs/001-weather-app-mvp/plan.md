@@ -23,6 +23,10 @@ Implementar app Android nativo de previsão do tempo usando Open-Meteo API (grat
 - Coil 2.5.0 (imagens)
 - Timber 5.0.1 (logging)
 - FusedLocationProvider (Play Services 21.0+)
+- Firebase Performance Monitoring 20.5.0 (startup trace + HTTP metrics)
+- Firebase Crashlytics 18.6.0 (monitoramento de crashes em produção)
+- LeakCanary 2.12 (debug only — detecção de memory leaks)
+- WorkManager 2.9.0 (limpeza automática cache >7 dias)
 
 **Storage**: Room Database SQLite (local cache), SharedPreferences (config simples)
 
@@ -275,11 +279,13 @@ Nenhuma violação de Constitution detectada. Sem justificativas necessárias.
 
 1. Testes instrumentados Espresso
 2. Screenshot tests Paparazzi
-3. Performance profiling
-4. Device testing em 2 devices
-5. ProGuard/R8 rules
-6. APK release < 15MB verificado
-7. Crédito "Dados: Open-Meteo.com" no footer
+3. Performance profiling (Android Profiler)
+4. Firebase Performance Monitoring setup (startup trace, HTTP metrics)
+5. LeakCanary validation — confirmar 0 leaks no debug build
+6. Device testing em 2 devices
+7. ProGuard/R8 rules
+8. APK release < 15MB verificado
+9. Crédito "Dados: Open-Meteo.com" no footer
 
 **DoD**: CI verde; APK validado; crash rate 0
 

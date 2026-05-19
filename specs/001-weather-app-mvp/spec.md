@@ -207,12 +207,12 @@ Cenário: Usuário digita nome da cidade e seleciona nos resultados
 GIVEN: Usuário clica no campo de busca
 WHEN: Campo fica em foco
 THEN: Exibe:
-  - Histórico de 3-5 últimas buscas
+  - Histórico de até 5 últimas buscas
   - Placeholder: "Buscar cidade..."
 
 GIVEN: Usuário digita "São Paulo"
 WHEN: Aguarda 500ms (debounce)
-THEN: Requisita /v1/geocoding?name=São%20Paulo&count=5&language=pt
+THEN: Requisita geocoding-api.open-meteo.com/v1/search?name=São%20Paulo&count=5&language=pt
 AND: Exibe 5 primeiros resultados:
   1. "São Paulo, São Paulo, Brasil" (-23.55, -46.63)
   2. "São Paulo, Paraná, Brasil" (-23.13, ...)
@@ -293,13 +293,18 @@ AND: Badge desaparece quando dados são sincronizados
 - [ ] RF-02.7: Cada card lista: hora, ícone WMO, temperatura, precipitação
 - [ ] RF-02.8: Scroll automático para "Agora" quando aba abre
 - [ ] RF-02.9: Tap em hora abre bottom sheet com detalhes completos
-- [ ] RF-02.10: Renderizar apenas 24 horas (não mais)
+- [ ] RF-02.10: A seção HourlyForecastSection exibe apenas as 24 horas do dia corrente.
+  O dataset completo (168h) é armazenado no domínio e filtrado por data no ViewModel;
+  o DayDetailSheet reutiliza esse mesmo dataset para exibir as 24h do dia selecionado.
 
 **Fontes de Dados**:
 - `hourly.time` (timestamps)
 - `hourly.temperature_2m` (24 valores)
 - `hourly.precipitation` (precipitação mm)
 - `hourly.weather_code` (para ícone)
+- `hourly.wind_speed_10m` (para HourDetailSheet)
+- `hourly.wind_direction_10m` (para HourDetailSheet)
+- `hourly.relative_humidity_2m` (para HourDetailSheet)
 
 **Critérios de Aceitação**:
 - Gráfico renderiza sem glitches até 24 pontos
@@ -326,7 +331,7 @@ AND: Badge desaparece quando dados são sincronizados
 - [ ] RF-03.3: Primeiro card (hoje) tem destaque visual (badge "HOJE" ou cor especial)
 - [ ] RF-03.4: Tap em card abre modal com:
   - Data grande + ícone grande
-  - Previsão horária para aquele dia
+  - Previsão horária para aquele dia (filtrar `hourly` onde `hourly.time[i]` começa com `daily.time[diaIndex]`, ex: filtra entradas "2026-05-18T*" para o dia selecionado)
   - Índices adicionais (umidade, vento, direção)
 - [ ] RF-03.5: Swipe left/right na modal navega entre dias
 - [ ] RF-03.6: Cards ocupam full-width da tela
@@ -358,10 +363,17 @@ AND: Badge desaparece quando dados são sincronizados
   - Mostrar toast: "Erro ao localizar. Use busca manual."
   - Exibir campo de busca
 
+- [ ] RF-04.5: Se `lastLocation` retornar null:
+  - Chamar `getCurrentLocation()` com timeout de 5 segundos
+  - Se timeout atingido sem retorno: exibir toast "Erro ao localizar. Use busca manual." e mostrar campo de busca
+- [ ] RF-04.6: Se GPS não retornar dentro de 30 segundos:
+  - Cancelar listener de refinement silenciosamente (sem alertar usuário)
+  - Badge "refinando..." desaparece sem substituição
+
 **Requisitos de Performance**:
-- [ ] RF-04.5: Startup com dados Network ≤ 2 segundos (Constitution)
-- [ ] RF-04.6: GPS refinement não bloqueia UI
-- [ ] RF-04.7: Badge desaparece assim que GPS retorna
+- [ ] RF-04.7: Startup com dados Network ≤ 2 segundos (Constitution)
+- [ ] RF-04.8: GPS refinement não bloqueia UI
+- [ ] RF-04.9: Badge desaparece assim que GPS retorna
 
 **Critérios de Aceitação**:
 - App abre e exibe dados em < 2s (mesmo com Network lento)
@@ -379,10 +391,10 @@ AND: Badge desaparece quando dados são sincronizados
 - [ ] RF-05.1: Campo de busca sempre acessível no topo (search bar)
 - [ ] RF-05.2: Placeholder: "Buscar cidade..."
 - [ ] RF-05.3: Quando campo recebe foco:
-  - Exibir últimas 3-5 buscas do histórico
+  - Exibir últimas 5 buscas do histórico (máximo)
   - Limpar placeholder
 - [ ] RF-05.4: Usuário digita, após 500ms (debounce):
-  - Requisitar `/v1/geocoding?name={input}&count=5&language=pt`
+  - Requisitar `geocoding-api.open-meteo.com/v1/search?name={input}&count=5&language=pt`
   - Exibir até 5 resultados
 - [ ] RF-05.5: Cada resultado mostra:
   - Nome da cidade
@@ -436,10 +448,17 @@ AND: Badge desaparece quando dados são sincronizados
 **Schema Room**:
 ```sql
 CREATE TABLE previsoes (
-  id TEXT PRIMARY KEY,              -- latitude,longitude
+  id TEXT PRIMARY KEY,              -- "latitude,longitude"
   latitude REAL NOT NULL,
   longitude REAL NOT NULL,
-  dados_json TEXT NOT NULL,         -- JSON completo da API
+  nome_localidade TEXT NOT NULL,    -- Ex: "São Paulo"
+  temp_atual REAL NOT NULL,         -- °C
+  sensacao_termica REAL NOT NULL,   -- °C
+  umidade INTEGER NOT NULL,         -- 0-100 %
+  velocidade_vento REAL NOT NULL,   -- km/h
+  direcao_vento INTEGER NOT NULL,   -- 0-359°
+  codigo_wmo INTEGER NOT NULL,      -- WMO weather code
+  dados_json TEXT NOT NULL,         -- JSON completo da resposta API
   timestamp_atualizado INTEGER,     -- milliseconds since epoch
   criado_em INTEGER
 );
@@ -531,14 +550,13 @@ CREATE TABLE previsoes (
 
 ### 5.1 Modelo de Dados
 
-#### Entity: PrevisaoCache (Room)
+#### Entity: PrevisaoEntity (Room)
 
 ```kotlin
 @Entity(tableName = "previsoes")
-@Serializable
-data class PrevisaoCache(
+data class PrevisaoEntity(
     @PrimaryKey
-    val id: String,  // Format: "latitude,longitude"
+    val id: String,  // Format: "lat_2decimais,lon_2decimais"
     
     val latitude: Double,
     val longitude: Double,
@@ -578,58 +596,30 @@ data class HistoricoBusca(
 )
 ```
 
-#### Data Model: Previsao (Domain)
+#### Domain Models
 
-```kotlin
-@Serializable
-data class Previsao(
-    val latitude: Double,
-    val longitude: Double,
-    val elevation: Double,
-    val generationtimeMs: Float,
-    val utcOffsetSeconds: Int,
-    val timezone: String,
-    val timezoneAbbreviation: String,
-    
-    val current: DadosAtuais,
-    val currentUnits: UnidadesAtuais,
-    
-    val hourly: DadosHorarios,
-    val hourlyUnits: UnidadesHorarias,
-    
-    val daily: DadosDiarios,
-    val dailyUnits: UnidadesDiarias
-)
+> **Fonte canônica**: ver [data-model.md](../data-model.md) — modelos de domínio,
+> DTOs, entidades Room, estados de UI e mappers completos.
+>
+> Esta spec mantém apenas o mapeamento de campos API → Domínio como referência rápida.
 
-@Serializable
-data class DadosAtuais(
-    val temperature2m: Float,
-    val relativeHumidity2m: Int,
-    val apparentTemperature: Float,
-    val weatherCode: Int,
-    val windSpeed10m: Float,
-    val windDirection10m: Int,
-    val time: String  // ISO8601
-)
+**Mapeamento de campos API → Domínio**:
 
-@Serializable
-data class DadosHorarios(
-    val time: List<String>,           // ISO8601 timestamps
-    val temperature2m: List<Float>,   // 24 valores
-    val precipitation: List<Float>,   // mm
-    val weatherCode: List<Int>        // WMO codes
-)
-
-@Serializable
-data class DadosDiarios(
-    val time: List<String>,                    // ISO8601 dates
-    val temperature2mMax: List<Float>,         // 7 valores
-    val temperature2mMin: List<Float>,         // 7 valores
-    val weatherCode: List<Int>,                // WMO codes
-    val precipitationProbabilityMax: List<Int>, // 0-100 %
-    val windSpeed10mMax: List<Float>           // km/h
-)
-```
+| Campo API (snake_case) | Campo Domínio (PT-BR camelCase) | Usado em |
+|------------------------|--------------------------------|----------|
+| `current.temperature_2m` | `DadosAtuais.temperaturaC` | RF-01 |
+| `current.apparent_temperature` | `DadosAtuais.sensacaoTermicaC` | RF-01 |
+| `current.relative_humidity_2m` | `DadosAtuais.umidadePercent` | RF-01 |
+| `current.wind_speed_10m` | `DadosAtuais.velocidadeVentoKmh` | RF-01 |
+| `current.wind_direction_10m` | `DadosAtuais.direcaoVentoGraus` | RF-01 |
+| `current.weather_code` | `DadosAtuais.codigoWMO` | RF-01, RF-02, RF-03 |
+| `hourly.time[i]` (data) | `HoraDados.dataIso` | RF-02, RF-03 (filtro) |
+| `hourly.time[i]` (hora) | `HoraDados.hora` | RF-02 |
+| `hourly.wind_speed_10m` | `HoraDados.velocidadeVentoKmh` | RF-02 (HourDetailSheet) |
+| `hourly.wind_direction_10m` | `HoraDados.direcaoVentoGraus` | RF-02 (HourDetailSheet) |
+| `hourly.relative_humidity_2m` | `HoraDados.umidadePercent` | RF-02 (HourDetailSheet) |
+| `daily.wind_direction_10m_dominant` | `DiaDados.direcaoDominanteVentoGraus` | RF-03 (DayDetailSheet) |
+| `daily.relative_humidity_2m_max` | `DiaDados.umidadeMaxPercent` | RF-03 (DayDetailSheet) |
 
 ---
 
@@ -644,8 +634,8 @@ Query Parameters:
   latitude (Float, required)          Ex: -23.5505
   longitude (Float, required)         Ex: -46.6333
   current (String, optional)          "temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m,wind_direction_10m"
-  hourly (String, optional)           "temperature_2m,precipitation,weather_code"
-  daily (String, optional)            "temperature_2m_max,temperature_2m_min,weather_code,precipitation_probability_max,wind_speed_10m_max"
+  hourly (String, optional)           "temperature_2m,precipitation,weather_code,wind_speed_10m,wind_direction_10m,relative_humidity_2m"
+  daily (String, optional)            "temperature_2m_max,temperature_2m_min,weather_code,precipitation_probability_max,wind_speed_10m_max,wind_direction_10m_dominant,relative_humidity_2m_max"
   timezone (String, optional)         "America/Sao_Paulo" (auto-detect)
   forecast_days (Integer, optional)   7 (default)
 
@@ -678,12 +668,18 @@ Response (200 OK):
     "time": ["2026-05-17T00:00", "2026-05-17T01:00", ...],
     "temperature_2m": [20.5, 20.2, 19.8, ...],
     "precipitation": [0.0, 0.0, 0.1, ...],
-    "weather_code": [0, 0, 1, ...]
+    "weather_code": [0, 0, 1, ...],
+    "wind_speed_10m": [12.0, 11.5, 10.8, ...],
+    "wind_direction_10m": [270, 265, 260, ...],
+    "relative_humidity_2m": [65, 67, 70, ...]
   },
   "hourly_units": {
     "temperature_2m": "°C",
     "precipitation": "mm",
-    "weather_code": "wmo code"
+    "weather_code": "wmo code",
+    "wind_speed_10m": "km/h",
+    "wind_direction_10m": "°",
+    "relative_humidity_2m": "%"
   },
   "daily": {
     "time": ["2026-05-17", "2026-05-18", ...],
@@ -691,14 +687,18 @@ Response (200 OK):
     "temperature_2m_min": [18.2, 17.8, ...],
     "weather_code": [1, 3, ...],
     "precipitation_probability_max": [10, 20, ...],
-    "wind_speed_10m_max": [18.5, 20.2, ...]
+    "wind_speed_10m_max": [18.5, 20.2, ...],
+    "wind_direction_10m_dominant": [270, 180, ...],
+    "relative_humidity_2m_max": [72, 85, ...]
   },
   "daily_units": {
     "temperature_2m_max": "°C",
     "temperature_2m_min": "°C",
     "weather_code": "wmo code",
     "precipitation_probability_max": "%",
-    "wind_speed_10m_max": "km/h"
+    "wind_speed_10m_max": "km/h",
+    "wind_direction_10m_dominant": "°",
+    "relative_humidity_2m_max": "%"
   }
 }
 
@@ -712,12 +712,13 @@ Error (4xx/5xx):
 #### Endpoint 2: Open-Meteo Geocoding
 
 ```
-POST https://api.open-meteo.com/v1/geocoding
+GET https://geocoding-api.open-meteo.com/v1/search
 
 Query Parameters:
   name (String, required)       "São Paulo"
   count (Integer, optional)     5 (default)
   language (String, optional)   "pt" (for Portuguese)
+  format (String, optional)     "json" (default)
 
 Response (200 OK):
 {
@@ -983,7 +984,7 @@ ENTÃO:
 DADO: Campo de busca recebe foco
 QUANDO: Usuário clica no ícone de pesquisa
 ENTÃO:
-  ✅ Histórico de 3-5 últimas buscas aparece
+  ✅ Histórico de até 5 últimas buscas aparece
   ✅ Placeholder muda para "Buscar cidade..."
   
 DADO: Usuário digita "São Paulo"
@@ -1058,6 +1059,10 @@ ENTÃO:
 | JUnit4 | 4.13.2+ | Unit testing |
 | Mockk | 1.13.0+ | Mocking framework |
 | Espresso | 3.5.0+ | UI testing |
+| Firebase Performance Monitoring | 20.5.0+ | Startup time e trace monitoring |
+| Firebase Crashlytics | 18.6.0+ | Monitoramento de crashes em produção |
+| LeakCanary | 2.12+ | Detecção de memory leaks (debug only) |
+| WorkManager | 2.9.0+ | Limpeza automática de cache >7 dias (background) |
 
 ### Dependências Internas (This Project)
 
