@@ -241,7 +241,7 @@ AND: Mensagem: "Usando dados em cache de há X horas"
 
 GIVEN: Usuário tenta pull-to-refresh
 WHEN: Sem conectividade
-THEN: Exibe toast:
+THEN: Exibe Snackbar transitório (≤4s):
   "Sem conexão. Usando dados em cache."
 AND: Badge permanece visível
 
@@ -360,7 +360,7 @@ AND: Badge desaparece quando dados são sincronizados
   - Exibir campo de busca
   - Botão para solicitar permissão novamente
 - [ ] RF-04.4: Se Network falha:
-  - Mostrar toast: "Erro ao localizar. Use busca manual."
+  - Mostrar Snackbar: "Erro ao localizar. Use busca manual."
   - Exibir campo de busca
 
 - [ ] RF-04.5: Se `lastLocation` retornar null:
@@ -483,7 +483,7 @@ CREATE TABLE previsoes (
 - [ ] RF-07.3: Spinner exibe enquanto carrega
 - [ ] RF-07.4: Após sucesso, anima spinner para fora
 - [ ] RF-07.5: Timestamp atualiza para "Atualizado há <1m"
-- [ ] RF-07.6: Se erro, exibe toast e spinner sai
+- [ ] RF-07.6: Se erro, exibe Snackbar transitório (≤4s) e spinner sai
 
 **Performance**:
 - [ ] RF-07.7: Spin duration ≤ 500ms (mesmo se API lenta, min)
@@ -536,7 +536,7 @@ CREATE TABLE previsoes (
 - **Compilação**: Android Studio 2024.1+
 - **Kotlin**: 100% (sem Java novo)
 - **Lint**: 0 erros, 0 avisos (Detekt + Android Lint)
-- **Testes**: ≥ 70% cobertura ViewModels, ≥ 60% UI
+- **Testes**: ≥ 80% cobertura ViewModels, ≥ 70% Repositories, ≥ 60% UI (conforme Constitution II)
 
 ### RNF-06: Escalabilidade
 
@@ -823,7 +823,7 @@ THEN:
   2. Verificar Room para dados antigos
   3. Se cache existe:
      - Exibir dados
-     - Toast: "Usando dados em cache (offline)"
+     - Snackbar transitório: "Usando dados em cache (offline)"
   4. Se nenhum cache:
      - Exibir tela de erro
      - Botão "Tentar novamente"
@@ -839,7 +839,7 @@ WHEN: Latitude não é -90 a 90 ou Longitude não é -180 a 180
 THEN:
   1. Log erro (Timber)
   2. Não requisitar API
-  3. Exibir toast: "Erro ao obter localização. Use busca manual."
+  3. Exibir Snackbar: "Erro ao obter localização. Use busca manual."
   4. Mostrar campo de busca
 ```
 
@@ -850,10 +850,10 @@ Cenário: Múltiplas requisições rápidas (ex: 10 buscas em 1 minuto)
 
 WHEN: Open-Meteo retorna 429 (Too Many Requests)
 THEN:
-  1. Exibir toast: "Muitas requisições. Tente novamente em 1 minuto."
-  2. Desabilitar button de search/refresh por 60s
-  3. Mostrar countdown
-  4. Usar cache local se disponível
+  1. Exibir RateLimitBanner (banner fixo laranja com countdown regressivo — implementado em T019)
+  2. Desabilitar botões de search/refresh durante countdown (via HomeViewModel.isRateLimited)
+  3. Countdown exibe segundos restantes (valor do header Retry-After ou 60s por padrão)
+  4. Usar cache local se disponível; quando countdown chega a zero, re-tentar automaticamente
 ```
 
 ### Caso Extremo 4: Permissão de Localização Negada Múltiplas Vezes

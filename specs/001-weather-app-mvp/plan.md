@@ -28,7 +28,7 @@ Implementar app Android nativo de previsão do tempo usando Open-Meteo API (grat
 - LeakCanary 2.12 (debug only — detecção de memory leaks)
 - WorkManager 2.9.0 (limpeza automática cache >7 dias)
 
-**Storage**: Room Database SQLite (local cache), SharedPreferences (config simples)
+**Storage**: Room Database SQLite (local cache via `PrevisaoEntity`); SharedPreferences para contador de negações de permissão de localização (CE-04 — único uso no MVP)
 
 **Testing**: JUnit4 4.13.2 + Mockk 1.13.9 + Espresso 3.5.1 + Paparazzi 1.3.2
 
@@ -124,8 +124,8 @@ app/
 │   │   │   │   ├── DadosHorarios.kt
 │   │   │   │   └── DadosDiarios.kt
 │   │   │   ├── repository/
-│   │   │   │   ├── PrevisaoRepository.kt  # Interface
-│   │   │   │   └── BuscaRepository.kt     # Interface
+│   │   │   │   ├── IPrevisaoRepository.kt  # Interface
+│   │   │   │   └── IBuscaRepository.kt     # Interface
 │   │   │   └── usecase/
 │   │   │       ├── ObterPrevisaoUseCase.kt
 │   │   │       └── BuscarCidadesUseCase.kt
@@ -280,7 +280,7 @@ Nenhuma violação de Constitution detectada. Sem justificativas necessárias.
 1. Testes instrumentados Espresso
 2. Screenshot tests Paparazzi
 3. Performance profiling (Android Profiler)
-4. Firebase Performance Monitoring setup (startup trace, HTTP metrics)
+4. Firebase Performance Monitoring validation (verificar métricas de startup e HTTP no console Firebase — setup já realizado em Phase 1 via T002/T003)
 5. LeakCanary validation — confirmar 0 leaks no debug build
 6. Device testing em 2 devices
 7. ProGuard/R8 rules
